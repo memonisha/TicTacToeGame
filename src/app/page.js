@@ -1,103 +1,116 @@
-import Image from "next/image";
+'use client';
+import { useState, useEffect } from 'react';
 
-export default function Home() {
+const initialBoard = Array(9).fill(null);
+
+export default function HomePage() {
+  const [board, setBoard] = useState(initialBoard);
+  const [xIsNext, setXIsNext] = useState(true);
+  const [winner, setWinner] = useState(null);
+  const [isDraw, setIsDraw] = useState(false);
+
+  // Load sounds
+  const clickSound = typeof Audio !== "undefined" ? new Audio('/click.mp3') : null;
+  const winSound = typeof Audio !== "undefined" ? new Audio('/win.mp3') : null;
+  const drawSound = typeof Audio !== "undefined" ? new Audio('/draw.mp3') : null;
+
+  const currentPlayer = xIsNext ? 'X' : 'O';
+
+  useEffect(() => {
+    const win = calculateWinner(board);
+    setWinner(win);
+    if (win) {
+      winSound?.play();
+    } else if (!win && board.every(cell => cell !== null)) {
+      setIsDraw(true);
+      drawSound?.play();
+    }
+  }, [board]);
+
+  const handleClick = (index) => {
+    if (board[index] || winner || isDraw) return;
+
+    const newBoard = [...board];
+    newBoard[index] = currentPlayer;
+    setBoard(newBoard);
+    setXIsNext(!xIsNext);
+    clickSound?.play();
+  };
+
+  const resetGame = () => {
+    setBoard(initialBoard);
+    setXIsNext(true);
+    setWinner(null);
+    setIsDraw(false);
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main style={{ textAlign: 'center', padding: 40, fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ fontSize: 36, marginBottom: 10 }}>Tic-Tac-Toe</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <p style={{ fontSize: 18, marginBottom: 30 }}>
+        Take turns playing as <strong>X</strong> and <strong>O</strong>. First to get 3 in a row wins!
+      </p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 100px)', gap: 10, margin: '0 auto 30px' }}>
+        {board.map((cell, idx) => (
+          <div
+            key={idx}
+            onClick={() => handleClick(idx)}
+            style={{
+              width: 100,
+              height: 100,
+              backgroundColor: '#f0f0f0',
+              border: '2px solid #333',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 32,
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            {cell}
+          </div>
+        ))}
+      </div>
+
+      <h2 style={{ marginBottom: 10 }}>
+        {winner
+          ? `🎉 Player ${winner} Wins!`
+          : isDraw
+          ? `🤝 It's a Draw!`
+          : `Next Turn: Player ${currentPlayer}`}
+      </h2>
+
+      <button
+        onClick={resetGame}
+        style={{
+          padding: '10px 20px',
+          fontSize: 16,
+          backgroundColor: '#0070f3',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 5,
+          cursor: 'pointer'
+        }}
+      >
+        Restart Game
+      </button>
+    </main>
   );
+}
+
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+  ];
+  for (let [a, b, c] of lines) {
+    if (squares[a] && squares[a] === squares[b] && squares[b] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
 }
