@@ -94,7 +94,9 @@ export default function HomePage() {
                 cursor: 'pointer'
               }}
             >
-              {cell}
+             <span style={{ color: cell === 'X' ? '#e63946' : 'purple' }}>
+             {cell}
+            </span>
             </div>
           ))}
         </div>
